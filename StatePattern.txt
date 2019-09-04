@@ -1,0 +1,120 @@
+/******************************************************************************
+
+                              Online C++ Compiler.
+               Code, Compile, Run and Debug C++ program online.
+Write your code in this editor and press "Run" button to compile and execute it.
+
+*******************************************************************************/
+
+#include <iostream>
+using namespace std;
+
+class state; 
+
+class MusicSys {
+public:
+	MusicSys();
+	
+	void playMusic();
+	void stopMusic();
+	void nextSong();
+	void prevSong();
+	
+	void setCurrentState(state *pState);
+	state* getStopppedState();
+	state* getPlayState();
+	
+	state *m_pStoppedState;
+	state *m_pPlayState;
+	state *m_pCurrentState;
+};
+
+class state {
+public:    
+	virtual void playMusic() {
+		cout << "Can not play music. It's in stoppedState \n";
+	}
+	virtual void stopMusic() {
+		cout << "No action taken. It's already in stoppedState \n";
+	}
+	virtual void nextSong() {
+		cout << "Can not move to next song. It's in stoppedState \n";
+	}
+	virtual void prevSong() {
+		cout << "Can not move to previous song. It's in stoppedState \n";
+	}
+};
+
+class stoppedState : public state {
+    MusicSys *m_pMusicSys;
+public:
+    stoppedState(MusicSys *pMusicSys) : m_pMusicSys(pMusicSys) { };
+    
+	void playMusic() override {
+		m_pMusicSys->setCurrentState(m_pMusicSys->getPlayState());
+		cout << "Playing music..... \n";
+	}
+};
+
+class playState : public state {
+    MusicSys *m_pMusicSys;
+public:
+    playState(MusicSys *pMusicSys) : m_pMusicSys(pMusicSys) { };
+	
+	void stopMusic() override {
+		m_pMusicSys->setCurrentState(m_pMusicSys->getStopppedState());
+		cout << "Stopped playing music \n";
+	}
+	void nextSong() override {
+		cout << "Moved to next song..... \n";
+	}
+	void prevSong() override {
+		cout << "Moved to previous song..... \n";
+	}
+};
+
+MusicSys::MusicSys() {
+    m_pStoppedState  = new stoppedState(this);
+    m_pPlayState = new playState(this);
+    
+    m_pCurrentState = m_pStoppedState;
+};
+
+void MusicSys::playMusic() {
+    m_pCurrentState->playMusic();
+};
+void MusicSys::stopMusic() {
+    m_pCurrentState->stopMusic();
+};
+void MusicSys::nextSong() {
+    m_pCurrentState->nextSong();
+};
+void MusicSys::prevSong() {
+    m_pCurrentState->prevSong();
+};
+	
+void MusicSys::setCurrentState(state *pState) { m_pCurrentState = pState;	};
+state* MusicSys::getStopppedState() { return m_pStoppedState; };
+state* MusicSys::getPlayState() { return m_pPlayState; };
+
+int main()
+{
+    cout<<"Hello World \n";
+    
+    MusicSys ms;
+    ms.stopMusic();
+    ms.nextSong();
+    ms.playMusic();
+    ms.nextSong();
+    ms.prevSong();
+
+    return 0;
+}
+
+Output:
+Hello World                                                                                                                                                
+No action taken. It's already in stoppedState                                                                                                              
+Can not move to next song. It's in stoppedState                                                                                                            
+Playing music.....                                                                                                                                         
+Moved to next song.....                                                                                                                                    
+Moved to previous song.....  
