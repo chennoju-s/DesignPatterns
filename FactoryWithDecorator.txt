@@ -1,0 +1,185 @@
+/******************************************************************************
+
+                              Online C++ Compiler.
+               Code, Compile, Run and Debug C++ program online.
+Write your code in this editor and press "Run" button to compile and execute it.
+
+*******************************************************************************/
+
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+class Pizza {
+    
+public:
+    string m_description;
+    
+    Pizza() : m_description("Unknown"){ };
+    Pizza(string description) : m_description(description){};
+    virtual void prepare() {
+        cout << description() << " is ready for packing... \n";
+    };
+    
+    virtual void Pack() {
+        cout << description() << " is ready for toppings... \n";
+    };
+    
+    virtual string description() {
+        return m_description;
+    }
+    
+    virtual double cost() = 0;
+};
+
+class VegPizza : public Pizza {
+    double m_cost;    
+public:
+    VegPizza():Pizza("Veg Pizza"), m_cost(1.99){ };
+    // void prepare() override {
+    //     cout << description() << " is ready for packing... \n";
+    // }
+    // void Pack() override {
+    //     cout << description() << " is ready for toppings... \n";
+    // }
+    double cost() override {
+        return m_cost;
+    }    
+};
+
+class MeatPizza : public Pizza {
+    double m_cost;    
+public:
+    MeatPizza():Pizza("Meat Pizza"),m_cost(2.49){ };   
+    // void prepare() override {
+    //     cout << description() << " is ready for packing... \n";
+    // }
+    // void Pack() override {
+    //     cout << description() << " is ready for toppings... \n";
+    // }
+    double cost() override {
+        return m_cost;
+    }
+};
+
+class Toppings : public Pizza {
+    string description() = 0;
+    double cost() = 0;
+};
+
+class cheese : public Toppings {
+    double m_cost;
+    Pizza* m_p;
+public:
+    cheese(Pizza* p) : m_p(p), m_cost(0.20){};
+    string description() {
+        return m_p->description() + " + cheese";
+    }
+    double cost() {
+        return m_cost + m_p->cost();
+    }
+};
+
+class chicken : public Toppings {
+    double m_cost;
+    Pizza* m_p;
+public:
+    chicken(Pizza* p) : m_p(p), m_cost(0.89){};
+    string description() {
+        return m_p->description() + " + chicken";
+    }
+    double cost() {
+        return m_cost + m_p->cost();
+    }
+};
+
+class pork : public Toppings {
+    double m_cost;
+    Pizza* m_p;
+public:
+    pork(Pizza* p) : m_p(p), m_cost(1.29){};
+    string description() {
+        return m_p->description() + " + pork";
+    }    
+    double cost() {
+        return m_cost + m_p->cost();
+    }
+};
+
+class PizzaFactory {
+    Pizza* m_p;
+    
+public:
+    enum Pizza_t {
+        VEG,
+        MEAT,
+    };
+    
+    Pizza* createPizza(Pizza_t type) {
+        if( Pizza_t::VEG == type )
+            m_p = new VegPizza();
+        if( Pizza_t::MEAT == type )
+            m_p = new MeatPizza();
+            
+        return m_p;
+    };
+};
+
+class PizzaStore {
+    PizzaFactory* m_pf;
+    Pizza *m_p;
+    
+public:
+    PizzaStore(PizzaFactory *pf):m_pf(pf) { };
+    
+    Pizza* orderPizza(PizzaFactory::Pizza_t type) {
+        m_p = m_pf->createPizza(type);
+        
+        m_p->prepare();
+        m_p->Pack();
+        
+        return m_p;
+    }
+    // void addCheese() {
+    //     m_p = new cheese(m_p);
+    // }
+    // void addChicken() {
+    //     m_p = new chicken(m_p);
+    // }
+    // void addpork() {
+    //     m_p = new pork(m_p);
+    // }    
+    // double pizzaCost() {
+    //     cout << "Take $ " << m_p->cost() << " for " << m_p->description() << "\n";
+    // }
+};
+
+int main ()
+{
+    cout << "Factory Pattern.... \n";
+    
+    // Get Pizza type from factory
+    PizzaFactory *l_pf = new PizzaFactory();
+    
+    // Forwared pizza type to pizza store;
+    PizzaStore *l_ps = new PizzaStore(l_pf);
+    Pizza* l_p1 = l_ps->orderPizza(PizzaFactory::Pizza_t::VEG);
+    l_p1 = new cheese(l_p1);
+    cout << "Take $ " << l_p1->cost() << " for " << l_p1->description() << "\n";
+    
+    Pizza* l_p2 = l_ps->orderPizza(PizzaFactory::Pizza_t::MEAT);
+    l_p2 = new chicken(l_p2);
+    l_p2 = new pork(l_p2);
+    cout << "Take $ " << l_p2->cost() << " for " << l_p2->description() << "\n";    
+    
+    return 0;
+}
+
+Output:
+Veg Pizza is ready for packing...                                                                                                                          
+Veg Pizza is ready for toppings...                                                                                                                         
+Take $ 2.19 for Veg Pizza + cheese                                                                                                                         
+Meat Pizza is ready for packing...                                                                                                                         
+Meat Pizza is ready for toppings...                                                                                                                        
+Take $ 4.67 for Meat Pizza + chicken + pork 
